@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_detail.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScrollView"
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/item_detail_title"
+            android:layout_width="fill_parent"
+            android:layout_height="64dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/font_size_title" />
+
+        <TextView
+            android:id="@+id/item_detail_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.4"
+            android:textSize="@dimen/font_size_text" />
+
+        <!-- <TextView
+             android:id="@+id/item_detail_width"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:textSize="@dimen/font_size_text" />
+
+         <TextView
+             android:id="@+id/item_detail_height"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:textSize="@dimen/font_size_text" />
+
+          <TextView
+             android:id="@+id/item_detail_date"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:gravity="right" />
+
+          <TextView
+             android:id="@+id/item_detail_descr"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content" />
+
+             <WebView
+             android:id="@+id/item_detail_web"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent" />   -->
+
+    </LinearLayout>
+</ScrollView>
