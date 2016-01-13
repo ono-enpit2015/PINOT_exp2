@@ -26,20 +26,18 @@ import java.util.StringTokenizer;
  */
 public class ItemDetailActivity extends Activity {
     private TextView mTitle;
-    //private TextView mDescr;
-    //private TextView mDate;
-    //private WebView mWeb;
-    //private TextView mDetailtext;
     public static long start = 0;
     final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
-    final String SDFILE3 = LOGDIR + "title_info.txt";
-    final String SDFILE4 = LOGDIR + "title_info_new.txt";
-    File Title = new File(SDFILE3);
-    File Title_w = new File(SDFILE4);
+    final String SDFILE1 = LOGDIR + "display.txt";
+    final String SDFILE2 = LOGDIR + "newdisplay.txt";
+    File DISPLAY = new File(SDFILE1);
+    File NewDISPLAY = new File(SDFILE2);
     private String line;		//title_info.txtの先頭から１行ずつ取ってきたものを格納
-    private int count;			//count=-1ならば既読、０以上なら未読で見たと判断した回数を表示
-    private int count_line;
+    private int touchflag_line;			//1ならば既読、０なら未読
+    private int viewcount_line;         //視認回数
+    private int displaycount_line;      //表示回数
     private String title_line;
+    private String link_line;
 
     public void onCreate(Bundle savedInstanceState) {
 
@@ -47,9 +45,6 @@ public class ItemDetailActivity extends Activity {
         setContentView(R.layout.item_detail);
 
         Intent intent = getIntent();
-		/*String link = intent.getStringExtra("LINK");
-        mWeb = (WebView)findViewById(R.id.item_detail_web);
-        mWeb.loadUrl(link);*/
         String title = intent.getStringExtra("TITLE");
         mTitle = (TextView) findViewById(R.id.item_detail_title);
         mTitle.setText(title);
@@ -100,26 +95,34 @@ public class ItemDetailActivity extends Activity {
             e. printStackTrace();
         }
 
-        try {						//ファイルへ書き込み：count=-1(既読)にする
-            Title.createNewFile();
+        try {						//ファイルへ書き込み：touchflag=1(既読)にする
+            DISPLAY.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            BufferedReader br = new BufferedReader(new FileReader(Title));
+            NewDISPLAY.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(DISPLAY));
             try {
-                BufferedWriter pw = new BufferedWriter(new FileWriter(Title_w,true));
+                BufferedWriter pw = new BufferedWriter(new FileWriter(NewDISPLAY,true));
                 try {
                     while((line = br.readLine()) != null){
                         StringTokenizer tok = new StringTokenizer(line,"\t\t");
                         title_line = tok.nextToken();
-                        count_line = Integer.parseInt(tok.nextToken());
+                        link_line = tok.nextToken();
+                        displaycount_line = Integer.parseInt(tok.nextToken());
+                        viewcount_line = Integer.parseInt(tok.nextToken());
+                        touchflag_line = Integer.parseInt(tok.nextToken());
                         if(title.equals(title_line)){
-                            count = -1;
-                            pw.write(title_line+"\t\t"+count);
+                            touchflag_line = 1;
+                            pw.write(title_line+"\t"+link_line+"\t"+displaycount_line+"\t"+viewcount_line+"\t"+touchflag_line);
                             pw.newLine();
                         }else{
-                            pw.write(title_line+"\t\t"+count_line);
+                            pw.write(title_line+"\t"+link_line+"\t"+displaycount_line+"\t"+viewcount_line+"\t"+touchflag_line);
                             pw.newLine();
                         }
                     }
@@ -129,8 +132,8 @@ public class ItemDetailActivity extends Activity {
                     e.printStackTrace();
                 }
                 br.close();
-                Title.delete();
-                Title_w.renameTo(Title);
+                DISPLAY.delete();
+                NewDISPLAY.renameTo(DISPLAY);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }

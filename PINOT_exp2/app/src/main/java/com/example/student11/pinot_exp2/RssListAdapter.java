@@ -29,7 +29,8 @@ public class RssListAdapter extends ArrayAdapter<Item> {
         View view = convertView;
 
         if (convertView == null){
-            view = mInflater.inflate(R.layout.item_row, null);		//item_row.xmlの内容を取得
+            //view = mInflater.inflate(R.layout.item_row, null);		//item_row.xmlの内容を取得
+            view = mInflater.inflate(android.R.layout.simple_list_item_1, null);
             //Log.i("a",""+view);
         }
 
@@ -38,7 +39,8 @@ public class RssListAdapter extends ArrayAdapter<Item> {
         if (item != null) {
             // Itemから必要なデータを取り出し、それぞれTextViewにセットする
             String title = item.getTitle().toString();
-            mTitle = (TextView) view.findViewById(R.id.item_title);
+            //mTitle = (TextView) view.findViewById(R.id.item_title);
+            mTitle = (TextView) view.findViewById(android.R.id.text1);
             mTitle.setText(title);
         }
         return view;
