@@ -19,7 +19,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.StringTokenizer;
+
+
 
 /**
  * Created by student11 on 2015/09/25.
@@ -28,16 +31,16 @@ public class ItemDetailActivity extends Activity {
     private TextView mTitle;
     public static long start = 0;
     final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
-    final String SDFILE1 = LOGDIR + "display.txt";
-    final String SDFILE2 = LOGDIR + "newdisplay.txt";
-    File DISPLAY = new File(SDFILE1);
-    File NewDISPLAY = new File(SDFILE2);
-    private String line;		//title_info.txtの先頭から１行ずつ取ってきたものを格納
-    private int touchflag_line;			//1ならば既読、０なら未読
-    private int viewcount_line;         //視認回数
-    private int displaycount_line;      //表示回数
-    private String title_line;
-    private String link_line;
+    final String SDFILE1 = LOGDIR + "displayed.txt";
+    final String SDFILE2 = LOGDIR + "tmp.txt";
+    File DISPLAYED = new File(SDFILE1);
+    File TMP = new File(SDFILE2);
+    private String line;
+    private int touch;
+    private int viewcount;         //視認回数
+    private int displaycount;      //表示回数
+    private String title_displayed;
+    private String link_displayed;
 
     public void onCreate(Bundle savedInstanceState) {
 
@@ -56,6 +59,7 @@ public class ItemDetailActivity extends Activity {
         try {
 
             String url = intent.getStringExtra("LINK");
+
             // HTMLのドキュメントを取得
             org.jsoup.nodes.Document document = Jsoup.connect(url).get();
 
@@ -72,7 +76,7 @@ public class ItemDetailActivity extends Activity {
                     links1 = document1.getElementsByTag("p");  		//タグ"p"の要素を格納
                     for (org.jsoup.nodes.Element link1 : links1) {
                         String clas1 = link1.attr("class");			//属性"class"の属性値を取得
-                        if(clas1.equals("ynDetailText") || clas1.equals("newsBody")){			//取得した属性値が"ynDetailText"と一致
+                        if(clas1.equals("ynDetailText") || clas1.equals("newsBody") || clas1.equals("yjS ymuiDate")){			//取得した属性値が"ynDetailText"と一致
                             String detailtext1 = link1.getElementsByAttribute("class").text();
                             TextView mDetailtext = (TextView) findViewById(R.id.item_detail_text);
                             mDetailtext.setText(detailtext1);
@@ -82,7 +86,7 @@ public class ItemDetailActivity extends Activity {
                     links2 = document1.getElementsByTag("div");  		//タグ"p"の要素を格納
                     for (org.jsoup.nodes.Element link2 : links2) {
                         String clas2 = link2.attr("class");			//属性"class"の属性値を取得
-                        if(clas2.equals("marB10 clearFix yjMt") || clas2.equals("newsParagraph piL") || clas2.equals("rics-column bd covered")){
+                        if(clas2.equals("marB10 clearFix yjMt") || clas2.equals("newsParagraph piL") || clas2.equals("rics-column bd covered") || clas2.equals("mainBody")){
                             String detailtext2 = link2.getElementsByAttribute("class").text();
                             TextView mDetailtext = (TextView) findViewById(R.id.item_detail_text);
                             mDetailtext.setText(detailtext2);
@@ -95,34 +99,38 @@ public class ItemDetailActivity extends Activity {
             e. printStackTrace();
         }
 
-        try {						//ファイルへ書き込み：touchflag=1(既読)にする
-            DISPLAY.createNewFile();
+        /*try {
+            DISPLAYED.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            NewDISPLAY.createNewFile();
+            TMP.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            BufferedReader br = new BufferedReader(new FileReader(DISPLAY));
+            BufferedReader br = new BufferedReader(new FileReader(DISPLAYED));
             try {
-                BufferedWriter pw = new BufferedWriter(new FileWriter(NewDISPLAY,true));
+                BufferedWriter pw = new BufferedWriter(new FileWriter(TMP,true));
                 try {
                     while((line = br.readLine()) != null){
                         StringTokenizer tok = new StringTokenizer(line,"\t\t");
-                        title_line = tok.nextToken();
-                        link_line = tok.nextToken();
-                        displaycount_line = Integer.parseInt(tok.nextToken());
-                        viewcount_line = Integer.parseInt(tok.nextToken());
-                        touchflag_line = Integer.parseInt(tok.nextToken());
-                        if(title.equals(title_line)){
-                            touchflag_line = 1;
-                            pw.write(title_line+"\t"+link_line+"\t"+displaycount_line+"\t"+viewcount_line+"\t"+touchflag_line);
-                            pw.newLine();
+                        title_displayed = tok.nextToken();
+                        link_displayed = tok.nextToken();
+                        displaycount = Integer.parseInt(tok.nextToken());
+                        viewcount = Integer.parseInt(tok.nextToken());
+                        touch = Integer.parseInt(tok.nextToken());
+                        if(title.equals(title_displayed)){
+                            if(touch == 0) {
+                                pw.write(title_displayed + "\t" + link_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + viewcount);
+                                pw.newLine();
+                            }else{
+                                pw.write(title_displayed+"\t"+link_displayed+"\t"+displaycount+"\t"+viewcount+"\t"+touch);
+                                pw.newLine();
+                            }
                         }else{
-                            pw.write(title_line+"\t"+link_line+"\t"+displaycount_line+"\t"+viewcount_line+"\t"+touchflag_line);
+                            pw.write(title_displayed+"\t"+link_displayed+"\t"+displaycount+"\t"+viewcount+ "\t"+touch);
                             pw.newLine();
                         }
                     }
@@ -132,14 +140,14 @@ public class ItemDetailActivity extends Activity {
                     e.printStackTrace();
                 }
                 br.close();
-                DISPLAY.delete();
-                NewDISPLAY.renameTo(DISPLAY);
+                DISPLAYED.delete();
+                TMP.renameTo(DISPLAYED);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 

@@ -1,8 +1,11 @@
 package com.example.student11.pinot_exp2;
 import android.app.ProgressDialog;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.util.Xml;
 import android.widget.ArrayAdapter;
 
@@ -12,11 +15,15 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 
 /**
@@ -30,27 +37,32 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
     private ProgressDialog mProgressDialog;
     public static long start;
     final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
-    final String SDFILE1 = LOGDIR + "display.txt";
-    final String SDFILE2 = LOGDIR + "newdisplay.txt";
-    final String SDFILE3 = LOGDIR + "tmpdisplay.txt";
+    final String SDFILE1 = LOGDIR + "displayed.txt";
+    final String SDFILE2 = LOGDIR + "received.txt";
+    final String SDFILE3 = LOGDIR + "tmp.txt";
     final String SDFILE4 = LOGDIR + "all.txt";
     private String line;		//title_info.txtの先頭から１行ずつ取ってきたものを格納
     private String line2;
     private int count;			//count=-1ならば既読、０以上なら未読で見たと判断した回数を表示
     private int count_line;
-    private String title_line;
-    private String title_line2;
-    private String link_line;
-    private String link_line2;
-    File DISPLAY = new File(SDFILE1);       //前回表示した見出し文の一覧（表示回数が3回に達したものは除外）
-    File NewDISPLAY = new File(SDFILE2);    //アプリ起動時に新しく受信した見出し文の一覧（DISPLAYと重複する見出し文有り）
-    File TmpDISPLAY = new File(SDFILE3);    //新しく表示する見出し文の一覧
+    private String title_displayed;
+    private String title_received;
+    private String title_tmp;
+    private String title_all;
+    private String link_displayed;
+    private String link_received;
+    private String link_tmp;
+    File DISPLAYED = new File(SDFILE1);       //前回表示した見出し文の一覧（表示回数が3回に達したものは除外）
+    File RECEIVED = new File(SDFILE2);    //アプリ起動時に受信した見出し文の一覧（DISPLAYと重複する見出し文有り）
+    File TMP = new File(SDFILE3);    //新しく表示する見出し文の一覧を一時格納
     File ALL = new File(SDFILE4);
     String link;
     String title;
-    int displaycount_line;
-    int viewcount_line;
-    int touchflag_line;
+    int displaycount;
+    int viewcount;
+    int touch;
+    ArrayList<String> list;
+    boolean flag;
 
     // コンストラクタ
     public RssParserTask(MainActivity activity, RssListAdapter adapter) {
@@ -152,17 +164,17 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
                         tag = parser.getName();
                         if (tag.equals("item")) {
                             try {
-                                DISPLAY.createNewFile();
+                                DISPLAYED.createNewFile();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                             try {
-                                NewDISPLAY.createNewFile();
+                                RECEIVED.createNewFile();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                             try {
-                                TmpDISPLAY.createNewFile();
+                                TMP.createNewFile();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -171,93 +183,151 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            BufferedWriter bw_newdisplay = new BufferedWriter(new FileWriter(NewDISPLAY,true));//trueは追記
-                            BufferedReader br_all = new BufferedReader(new FileReader(ALL));
-                            System.out.println(title+":"+link);
+                            BufferedWriter received = new BufferedWriter(new FileWriter(RECEIVED,true));//trueは追記
+                            BufferedReader all = new BufferedReader(new FileReader(ALL));
+                            //System.out.println(title+":"+link);
                             boolean flag=false;         //false:all.txtにない ,true:all.txtにある
-                            while((line = br_all.readLine()) != null) {
+                            while((line = all.readLine()) != null) {
                                 StringTokenizer tok = new StringTokenizer(line, "\t");
-                                title_line = tok.nextToken();
-                                if(title.equals(title_line)) {
+                                title_all = tok.nextToken();
+                                if(title.equals(title_all)) {
                                     flag = true;
                                     break;
                                 }
                             }
-                            if(!flag){
-                                bw_newdisplay.write(title + "\t" + link);
-                                bw_newdisplay.newLine();
+                            if(!flag){              //3回表示された見出し文が再度表示されるのを防ぐ
+                                received.write(title + "\t" + link);
+                                received.newLine();
                             }
-                            br_all.close();
-                            bw_newdisplay.close();
+                            all.close();
+                            received.close();
                         }
                         break;
                 }
                 eventType = parser.next();      //nextメソッドで一行ずつイベントタイプを取得
             }
-            //新しい見出し文と前回の見出し文を比較
-            BufferedReader br_newdisplay = new BufferedReader(new FileReader(NewDISPLAY));
-            BufferedReader br_display = new BufferedReader(new FileReader(DISPLAY));
-            BufferedWriter bw_tmpdisplay = new BufferedWriter(new FileWriter(TmpDISPLAY,true));
-            line = br_display.readLine();
-            if(line == null){               //display.txtの中身が空の場合
-                //System.out.println("display.txtは空と判定");
-                 while((line2 = br_newdisplay.readLine()) != null){
+            //受信した見出し文と前回の見出し文を比較
+            try {
+                BufferedReader received = new BufferedReader(new FileReader(RECEIVED));
+                list = new ArrayList<String>();
+                while ((line = received.readLine()) != null) {
+                    StringTokenizer tok = new StringTokenizer(line, "\t");
+                    title_received = tok.nextToken();
+                    link_received = tok.nextToken();
+                /*if (line == null) {               //display.txtの中身が空の場合
+                    //System.out.println("display.txtは空と判定");
+                    while ((line2 = received.readLine()) != null) {
+                        list.add(line2 + "\t" + 1 + "\t" + 0 + "\t" + 0);
                      StringTokenizer tok = new StringTokenizer(line2, "\t");
                      title_line2 = tok.nextToken();
                      link_line2 = tok.nextToken();
-                     bw_tmpdisplay.write(title_line2+"\t"+link_line2+"\t"+1+"\t"+0+"\t"+0);
+                     bw_tmpdisplay.write(title_line2+"\t"+link_line2+"\t"+1+"\t"+0+"\t"+0);         //タイトル・URL・表示回数・視認回数・タップ情報（０：未，１～３：初タップ時の視認回数）
                      bw_tmpdisplay.newLine();
-                 }
-            }else if(line != null){         //display.txtに書き込まれている場合
-                //System.out.println("display.txtの内容ありと判定");
-                while((line2 = br_newdisplay.readLine()) != null){
-                    StringTokenizer tok2 = new StringTokenizer(line2, "\t");
-                    title_line2 = tok2.nextToken();
-                    link_line2 = tok2.nextToken();
-                    boolean flag = false;               //tmpdisplay.txtに書き込みをしたか否かのフラグ
-                    //System.out.println("title2:"+title_line2);
-                    while(line != null){
-                        StringTokenizer tok = new StringTokenizer(line, "\t");
-                        title_line = tok.nextToken();
-                        link_line = tok.nextToken();
-                        displaycount_line = Integer.parseInt(tok.nextToken());
-                        viewcount_line = Integer.parseInt(tok.nextToken());
-                        touchflag_line = Integer.parseInt(tok.nextToken());
-                        //System.out.println("title:"+title_line);
-                        if(title_line.equals(title_line2)){     // 前回表示した見出し文
-                            //System.out.println("既出");
-                            displaycount_line++;
-                            bw_tmpdisplay.write(title_line + "\t" + link_line + "\t" + displaycount_line + "\t" + viewcount_line + "\t" + touchflag_line);
-                            bw_tmpdisplay.newLine();
-                            flag = true;
-                            break;
-                        }
-                        line = br_display.readLine();
+                        Log.i("a", "display.txtの中身が空");
                     }
-                    if(!flag){            //新出見出し文
-                        //System.out.println("新出");
-                        bw_tmpdisplay.write(title_line2+"\t"+link_line2+"\t"+1+"\t"+0+"\t"+0);
-                        bw_tmpdisplay.newLine();
+                } else if (line != null) {         //display.txtに書き込まれている場合*/
+                    //System.out.println("display.txtの内容ありと判定");
+                    try {
+                        BufferedReader displayed = new BufferedReader(new FileReader(DISPLAYED));
+                        flag = true;             //tmp.txtに書き込みをしたか否かのフラグ
+                        while ((line2 = displayed.readLine()) != null) {
+                            StringTokenizer tok2 = new StringTokenizer(line2, "\t");
+                            title_displayed = tok2.nextToken();
+                            link_displayed = tok2.nextToken();
+                            displaycount = Integer.parseInt(tok2.nextToken());
+                            viewcount = Integer.parseInt(tok2.nextToken());
+                            touch = Integer.parseInt(tok2.nextToken());
+                            //while (line != null) {
+                        /*StringTokenizer tok3 = new StringTokenizer(line, "\t");
+                        title_displayed = tok3.nextToken();
+                        link_displayed = tok3.nextToken();
+                        displaycount = Integer.parseInt(tok3.nextToken());
+                        viewcount = Integer.parseInt(tok3.nextToken());
+                        touch = Integer.parseInt(tok3.nextToken());
+                        System.out.println(title_displayed + ":" + title_received);*/
+                            if (title_displayed.equals(title_received)) {     // 前回表示した見出し文との比較
+                                displaycount++;
+                                list.add(title_displayed + "\t" + link_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
+                                Log.i("1", "既出" + ":" + title_displayed + "\t" + link_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
+                                /*try{
+                                    BufferedWriter tmp = new BufferedWriter(new FileWriter(TMP,true));
+                                    tmp.write(title_displayed + "\t" + link_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
+                                    tmp.newLine();
+                                    tmp.close();
+                                }catch (IOException e){
+                                    e.printStackTrace();
+                                }*/
+                                flag = false;
+                                break;
+                            }
+                            //line = displayed.readLine();
+                            //}
+                        }
+                        if(flag){            //新出見出し文
+                            //System.out.println("新出");
+                            //bw_tmpdisplay.write(title_line2+"\t"+link_line2+"\t"+1+"\t"+0+"\t"+0);
+                            //bw_tmpdisplay.newLine();
+                            list.add(title_received + "\t" + link_received + "\t" + 1 + "\t" + 0 + "\t" + -1);
+                            Log.i("2", "新出" + ":" + title_received);
+                            /*try{
+                                BufferedWriter tmp = new BufferedWriter(new FileWriter(TMP,true));
+                                tmp.write(title_received + "\t" + link_received + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
+                                tmp.newLine();
+                                tmp.close();
+                            }catch (IOException e){
+                                e.printStackTrace();
+                            }*/
+                        }
+                        displayed.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+                received.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            br_display.close();
-            br_newdisplay.close();
-            bw_tmpdisplay.close();
-            DISPLAY.delete();
-            NewDISPLAY.delete();
-            TmpDISPLAY.renameTo(DISPLAY);
-            BufferedReader br = new BufferedReader(new FileReader(DISPLAY));
-            while((line = br.readLine()) != null){
+            for ( int i = 0; i < list.size(); i++ ) {
+                System.out.println( list.get( i ) );
+            }
+            //}
+            //displayed.close();
+            //received.close();
+            Collections.shuffle(list);
+            BufferedWriter tmp = new BufferedWriter(new FileWriter(TMP));
+            for ( int i = 0; i < list.size(); i++ ) {
+                tmp.write(list.get(i));
+                tmp.newLine();
+            }
+            tmp.close();
+            /*Collections.shuffle(list);
+            Iterator<String> it = list.iterator();
+            BufferedWriter tmp = new BufferedWriter(new FileWriter(TMP));
+            while (it.hasNext()) {
+                //String e = it.next();
+                tmp.write(it.next());
+                tmp.newLine();
+                //System.out.println(e);
+            }
+            tmp.close();*/
+            BufferedReader br2 = new BufferedReader(new FileReader(TMP));
+            while((line = br2.readLine()) != null){
                 currentItem = new Item("");
                 StringTokenizer tok = new StringTokenizer(line, "\t");
-                title_line = tok.nextToken();
-                link_line = tok.nextToken();
-                currentItem.setTitle(title_line);
-                currentItem.setLink(link_line);
+                title_tmp = tok.nextToken();
+                link_tmp = tok.nextToken();
+                currentItem.setTitle(title_tmp);
+                currentItem.setLink(link_tmp);
                 mAdapter.add(currentItem);
             }
-            br.close();
+            br2.close();
+            DISPLAYED.delete();
+            RECEIVED.delete();
+            TMP.renameTo(DISPLAYED);
         } catch (Exception e) {
             e.printStackTrace();
         }
