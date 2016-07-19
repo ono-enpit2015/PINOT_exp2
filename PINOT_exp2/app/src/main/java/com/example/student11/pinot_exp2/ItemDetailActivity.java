@@ -30,7 +30,8 @@ import java.util.StringTokenizer;
 public class ItemDetailActivity extends Activity {
     private TextView mTitle;
     public static long start = 0;
-    final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
+    final String LOGDIR = "/sdcard/";           //android6.0に対応
+    //final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
     final String SDFILE1 = LOGDIR + "displayed.txt";
     final String SDFILE2 = LOGDIR + "tmp.txt";
     File DISPLAYED = new File(SDFILE1);

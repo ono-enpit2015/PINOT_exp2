@@ -1,12 +1,16 @@
 package com.example.student11.pinot_exp2;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -45,7 +50,8 @@ public class MainActivity extends ListActivity {
     private static final String RSS_FEED_URL =  "http://www.rssmix.com/u/6589813/rss.xml";
     private ArrayList<Item> mItems;
     private RssListAdapter mAdapter;
-    final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
+    final String LOGDIR = "/sdcard/";           //android6.0に対応
+    //final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
     final String SDFILE1 = LOGDIR + "displayed.txt";
     final String SDFILE2 = LOGDIR + "tmp.txt";
     final String SDFILE2_2 = LOGDIR + "tmp2.txt";
@@ -217,7 +223,7 @@ public class MainActivity extends ListActivity {
                     ftp.setSoTimeout(15000);
 
                     // ログイン
-                    if (!ftp.login("ono", "xftmrnkoblab")) {
+                    if (!ftp.login("ono", "qt7gn089ebdonx2")) {
 
                         return "サーバーの認証に失敗しました";
                     }
