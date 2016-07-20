@@ -14,7 +14,16 @@
             android:layout_width="fill_parent"
             android:layout_height="64dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/font_size_title" />
+            android:textSize="@dimen/font_size_title"
+            android:gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.4"
+            android:textSize="@dimen/date"
+            android:layout_gravity="right"/>
 
         <TextView
             android:id="@+id/item_detail_text"

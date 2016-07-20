@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.view.KeyEvent;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.student11.pinot_exp2.R;
 
@@ -42,6 +43,7 @@ public class ItemDetailActivity extends Activity {
     private int displaycount;      //表示回数
     private String title_displayed;
     private String link_displayed;
+    String crlf = System.getProperty("line.separator");
 
     public void onCreate(Bundle savedInstanceState) {
 
@@ -75,23 +77,51 @@ public class ItemDetailActivity extends Activity {
                     org.jsoup.nodes.Document document1 = Jsoup.connect(url1).get();
                     Elements links1 = null;
                     links1 = document1.getElementsByTag("p");  		//タグ"p"の要素を格納
+                    String detailtext1 = "";
                     for (org.jsoup.nodes.Element link1 : links1) {
                         String clas1 = link1.attr("class");			//属性"class"の属性値を取得
-                        if(clas1.equals("ynDetailText") || clas1.equals("newsBody") || clas1.equals("yjS ymuiDate")){			//取得した属性値が"ynDetailText"と一致
-                            String detailtext1 = link1.getElementsByAttribute("class").text();
-                            TextView mDetailtext = (TextView) findViewById(R.id.item_detail_text);
-                            mDetailtext.setText(detailtext1);
-                        }
+                            if (clas1.equals("ynDetailText") || clas1.equals("newsBody") || clas1.equals("yjS ymuiDate")) {            //取得した属性値が"ynDetailText"と一致
+                                String str = link1.getElementsByAttribute("class").text();
+
+                                String[] detailtext = str.split("。", 0);
+                                for (String text : detailtext) {
+                                    detailtext1 += text + "。" + crlf + crlf;
+                                }
+
+                                TextView mDetailtext = (TextView) findViewById(R.id.item_detail_text);
+                                mDetailtext.setText(detailtext1);
+                            }
                     }
                     Elements links2 = null;
                     links2 = document1.getElementsByTag("div");  		//タグ"p"の要素を格納
+                    String detailtext2 = "";
                     for (org.jsoup.nodes.Element link2 : links2) {
                         String clas2 = link2.attr("class");			//属性"class"の属性値を取得
                         if(clas2.equals("marB10 clearFix yjMt") || clas2.equals("newsParagraph piL") || clas2.equals("rics-column bd covered") || clas2.equals("mainBody")){
-                            String detailtext2 = link2.getElementsByAttribute("class").text();
+                            String str = link2.getElementsByAttribute("class").text();
+
+                            String[] detailtext = str.split("。", 0);
+                            for(String text: detailtext){
+                                detailtext2 += text + "。" + crlf + crlf;
+                            }
+
                             TextView mDetailtext = (TextView) findViewById(R.id.item_detail_text);
                             mDetailtext.setText(detailtext2);
                         }
+                    }
+                    Elements links3 = null;
+                    links3 = document1.getElementsByTag("p");  		//タグ"p"の要素を格納
+                    for (org.jsoup.nodes.Element link3 : links3) {
+                        String clas3 = link3.attr("class");			//属性"class"の属性値を取得
+                        if (clas3.equals("ymuiDate") || clas3.equals("source") || clas3.equals("ynLastEditDate yjSt") || clas3.equals("ynLastEditDate yjS")) {
+                            String date = link3.getElementsByAttribute("class").text()+"\n";
+                            TextView mDate = (TextView) findViewById(R.id.date);
+                            mDate.setText(date);
+                        }
+                    }
+
+                    if(detailtext1.isEmpty()){
+                        Toast.makeText(ItemDetailActivity.this, "記事情報を取得できませんでした", Toast.LENGTH_SHORT).show();
                     }
                 }
             }

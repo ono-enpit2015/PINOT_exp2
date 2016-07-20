@@ -7,6 +7,7 @@ import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
@@ -116,10 +117,12 @@ public class MainActivity extends ListActivity {
         timer();
 
         Item item = mItems.get(position);
-        Intent intent = new Intent(this, ItemDetailActivity.class);
         list.add(String.valueOf(item.getTitle()));
+        Intent intent = new Intent(this, ItemDetailActivity.class);
         intent.putExtra("TITLE", item.getTitle());
         intent.putExtra("LINK", item.getLink());
+
+        //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.valueOf(item.getLink())));  //指定したURLを表示
 
         startActivity(intent);
     }
