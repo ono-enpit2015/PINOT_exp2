@@ -17,6 +17,14 @@
             android:textSize="@dimen/font_size_title"
             android:gravity="center_vertical"/>
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:layout_gravity="center_horizontal"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"/>
+
         <TextView
             android:id="@+id/date"
             android:layout_width="210dp"

@@ -36,8 +36,8 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
     private RssListAdapter mAdapter;
     private ProgressDialog mProgressDialog;
     public static long start;
-    final String LOGDIR = "/sdcard/";           //android6.0に対応
-    //final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
+    //final String LOGDIR = "/sdcard/";           //  /sdcard/data/がない場合
+    final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
     final String SDFILE1 = LOGDIR + "displayed.txt";
     final String SDFILE2 = LOGDIR + "received.txt";
     final String SDFILE3 = LOGDIR + "tmp.txt";

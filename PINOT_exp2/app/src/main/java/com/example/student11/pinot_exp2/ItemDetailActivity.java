@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.view.KeyEvent;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,12 +32,12 @@ import java.util.StringTokenizer;
 public class ItemDetailActivity extends Activity {
     private TextView mTitle;
     public static long start = 0;
-    final String LOGDIR = "/sdcard/";           //android6.0に対応
+    //final String LOGDIR = "/sdcard/";           //android6.0に対応
     //final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
-    final String SDFILE1 = LOGDIR + "displayed.txt";
-    final String SDFILE2 = LOGDIR + "tmp.txt";
-    File DISPLAYED = new File(SDFILE1);
-    File TMP = new File(SDFILE2);
+    //final String SDFILE1 = LOGDIR + "displayed.txt";
+    //final String SDFILE2 = LOGDIR + "tmp.txt";
+    //File DISPLAYED = new File(SDFILE1);
+    //File TMP = new File(SDFILE2);
     private String line;
     private int touch;
     private int viewcount;         //視認回数
@@ -114,15 +115,46 @@ public class ItemDetailActivity extends Activity {
                     for (org.jsoup.nodes.Element link3 : links3) {
                         String clas3 = link3.attr("class");			//属性"class"の属性値を取得
                         if (clas3.equals("ymuiDate") || clas3.equals("source") || clas3.equals("ynLastEditDate yjSt") || clas3.equals("ynLastEditDate yjS")) {
-                            String date = link3.getElementsByAttribute("class").text()+"\n";
+                            String date = "\n"+link3.getElementsByAttribute("class").text()+"\n";
                             TextView mDate = (TextView) findViewById(R.id.date);
                             mDate.setText(date);
                         }
                     }
 
-                    if(detailtext1.isEmpty()){
-                        Toast.makeText(ItemDetailActivity.this, "記事情報を取得できませんでした", Toast.LENGTH_SHORT).show();
+                    String image_url = "";
+                    Elements links4 = document1.select("img[onContextMenu]");
+                    image_url = links4.attr("src");            //属性"class"の属性値を取得
+                    if(!image_url.isEmpty()) {
+                        //imageを取得
+                        ImageView image = (ImageView) findViewById(R.id.imageView);
+                        //画像取得スレッド起動
+                        ImageGetTask task = new ImageGetTask(image);
+                        task.execute(image_url);
                     }
+
+                    /*Elements links4 = null;
+                    Elements links4_2 = null;
+                    links4 = document1.getElementsByTag("div");  		//タグ"p"の要素を格納
+                    for (org.jsoup.nodes.Element link4 : links4) {
+                        links4_2 = link4.getElementsByTag("img");
+                        System.out.println("links4_2：" + links4_2);
+                        for (org.jsoup.nodes.Element link4_2 : links4_2) {
+                                image_url = link4_2.attr("src");            //属性"class"の属性値を取得
+                                System.out.println("画像のURL：" + image_url);
+                                Toast.makeText(ItemDetailActivity.this, image_url, Toast.LENGTH_SHORT).show();
+                            if(!image_url.isEmpty()) {
+                                //imageを取得
+                                ImageView image = (ImageView) findViewById(R.id.imageView);
+                                //画像取得スレッド起動
+                                ImageGetTask task = new ImageGetTask(image);
+                                task.execute(image_url);
+                            }
+                        }
+                    }*/
+
+                    /*if(detailtext1.isEmpty()){
+                        Toast.makeText(ItemDetailActivity.this, "記事情報を取得できませんでした", Toast.LENGTH_SHORT).show();
+                    }*/
                 }
             }
         } catch (IOException e) {

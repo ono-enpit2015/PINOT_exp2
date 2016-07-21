@@ -51,8 +51,8 @@ public class MainActivity extends ListActivity {
     private static final String RSS_FEED_URL =  "http://www.rssmix.com/u/6589813/rss.xml";
     private ArrayList<Item> mItems;
     private RssListAdapter mAdapter;
-    final String LOGDIR = "/sdcard/";           //android6.0に対応
-    //final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
+    //final String LOGDIR = "/sdcard/";           //  /sdcard/data/がない場合
+    final String LOGDIR = Environment.getExternalStorageDirectory().getPath()+"/data/";
     final String SDFILE1 = LOGDIR + "displayed.txt";
     final String SDFILE2 = LOGDIR + "tmp.txt";
     final String SDFILE2_2 = LOGDIR + "tmp2.txt";
