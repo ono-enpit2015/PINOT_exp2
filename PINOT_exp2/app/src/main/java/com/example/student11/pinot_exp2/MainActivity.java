@@ -58,6 +58,7 @@ public class MainActivity extends ListActivity {
     final String SDFILE2_2 = LOGDIR + "tmp2.txt";
     final String SDFILE3 = LOGDIR + "all.txt";
     final String SDFILE4 = LOGDIR + "username.txt";
+    File DATA = new File(LOGDIR);
     File DISPLAYED = new File(SDFILE1);
     File TMP = new File(SDFILE2);
     File TMP2 = new File(SDFILE2_2);
@@ -94,6 +95,10 @@ public class MainActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(!DATA.exists()) {
+            DATA.mkdir();
+        }
 
         if(!NAME.exists()){
             namedialog();
