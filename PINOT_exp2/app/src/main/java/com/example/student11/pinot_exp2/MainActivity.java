@@ -78,7 +78,7 @@ public class MainActivity extends ListActivity {
     int touchflag_line;
     int allcount;
     AsyncTask<Void, Void, String> task;
-    private ProgressDialog progressDialog;
+    //private ProgressDialog progressDialog;
     static String path;
     String resultFileName;
     String username;
@@ -90,6 +90,7 @@ public class MainActivity extends ListActivity {
     private String title_displayed;
     private String link_displayed;
     static Set<String> set;
+    static ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +121,11 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         timer();
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage("記事を読み込み中・・・");
+        progressDialog.setCancelable(true);
+        progressDialog.show();
 
         Item item = mItems.get(position);
         list.add(String.valueOf(item.getTitle()));

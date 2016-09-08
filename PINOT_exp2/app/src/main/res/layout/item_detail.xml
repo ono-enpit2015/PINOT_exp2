@@ -13,16 +13,19 @@
             android:id="@+id/item_detail_title"
             android:layout_width="fill_parent"
             android:layout_height="64dp"
+            android:layout_marginLeft="10dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/font_size_title"
             android:gravity="center_vertical"/>
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:id="@+id/imageView"
             android:layout_gravity="center_horizontal"
             android:adjustViewBounds="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
             android:scaleType="fitXY"/>
 
         <TextView
@@ -38,6 +41,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:lineSpacingMultiplier="1.4"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
             android:textSize="@dimen/font_size_text" />
 
         <!-- <TextView

@@ -196,7 +196,7 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
                                     break;
                                 }
                             }
-                            if(!flag){              //3回表示された見出し文が再度表示されるのを防ぐ
+                            if(!flag && containsUnicode(title)){              //3回表示された見出し文が再度表示されるのを防ぐ
                                 received.write(title + "\t" + link);
                                 received.newLine();
                             }
@@ -333,5 +333,28 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
             e.printStackTrace();
         }
         return mAdapter;
+    }
+
+    public static boolean containsUnicode(String str) {
+        for(int i = 0 ; i < str.length() ; i++) {
+            char ch = str.charAt(i);
+            Character.UnicodeBlock unicodeBlock = Character.UnicodeBlock.of(ch);
+
+            if (Character.UnicodeBlock.HIRAGANA.equals(unicodeBlock))
+                return true;
+
+            if (Character.UnicodeBlock.KATAKANA.equals(unicodeBlock))
+                return true;
+
+            if (Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS.equals(unicodeBlock))
+                return true;
+
+            if (Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS.equals(unicodeBlock))
+                return true;
+
+            if (Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION.equals(unicodeBlock))
+                return true;
+        }
+        return false;
     }
 }
