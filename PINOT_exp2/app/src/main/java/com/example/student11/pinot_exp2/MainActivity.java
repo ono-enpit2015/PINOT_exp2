@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 public class MainActivity extends ListActivity {
-    private static final String RSS_FEED_URL =  "http://www.rssmix.com/u/6589813/rss.xml";
+    private static final String RSS_FEED_URL =  "http://www.rssmix.com/u/6589813/rss.xml";//http://www.rssmix.com/u/6589813/rss.xml
     private ArrayList<Item> mItems;
     private RssListAdapter mAdapter;
     //final String LOGDIR = "/sdcard/";           //  /sdcard/data/がない場合
@@ -497,6 +497,15 @@ public class MainActivity extends ListActivity {
                     if (displaycount >= 3) {
                         all.write(title_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
                         all.newLine();
+                    }else{
+                        try {
+                            BufferedWriter bw = new BufferedWriter(new FileWriter(TMP2, true));
+                            bw.write(title_displayed + "\t" + link_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
+                            bw.newLine();
+                            bw.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 all.close();
@@ -507,7 +516,10 @@ public class MainActivity extends ListActivity {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        DISPLAYED.delete();
+        TMP2.renameTo(DISPLAYED);
     }
+
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode==KeyEvent.KEYCODE_BACK){				// 戻るボタンが押された！

@@ -59,6 +59,8 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
     File ALL = new File(SDFILE4);
     String link;
     String title;
+    String id;
+    String newsid;
     int displaycount;
     int viewcount;
     int touch;
@@ -133,11 +135,11 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
         start = System.currentTimeMillis();
     }
 
-    //XmlPullParser.START_DOCUMENT 	ドキュメントの開始
-    //XmlPullParser.END_DOCUMENT 	ドキュメントの終わり
-    //XmlPullParser.START_TAG 	開始タグ<~>
-    //XmlPullParser.END_TAG 	終了タグ<~/>
-    //XmlPullParser.TEXT 	要素
+    //XmlPullParser.START_DOCUMENT 	ドキュメントの開始   0
+    //XmlPullParser.END_DOCUMENT 	ドキュメントの終わり  1
+    //XmlPullParser.START_TAG 	開始タグ<~>     2
+    //XmlPullParser.END_TAG 	終了タグ<~/>    3
+    //XmlPullParser.TEXT 	要素      4
 
     // XMLをパースする
     public RssListAdapter parseXml(InputStream is) throws IOException, XmlPullParserException {		//inputStream:XMLストリームを指定する
@@ -147,6 +149,7 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
             int eventType = parser.getEventType();			//イベントタイプを取得。今読み込んでいる場所がどの状態かを知る
             Item currentItem = null;
             while (eventType != XmlPullParser.END_DOCUMENT) {
+                //System.out.println("イベントタイプ:"+eventType+":"+parser.getName());
                 String tag = null;
                 switch (eventType) {
                     case XmlPullParser.START_TAG:
@@ -156,12 +159,15 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
                         } else if (currentItem != null) {*/
                             if (tag.equals("title")) {
                                 title = parser.nextText();
+                                //System.out.println("title:" + title);
                             }
                             else if (tag.equals("link")) {
-                                link = parser.nextText();                            }
+                                link = parser.nextText();
+                                //System.out.println("link:" + link);
+                            }
                         //}
                         break;
-                    case XmlPullParser.END_TAG:				//itemタグが終わったら、そこで１記事のセットが終了したとしてlistに追加。
+                    case XmlPullParser.END_TAG:			//itemタグが終わったら、そこで１記事のセットが終了したとしてlistに追加。
                         tag = parser.getName();
                         if (tag.equals("item")) {
                             try {
@@ -292,6 +298,44 @@ public class RssParserTask extends AsyncTask<String, Integer, RssListAdapter> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            try {
+                BufferedReader bw = new BufferedReader(new FileReader(DISPLAYED));
+                while ((line = bw.readLine()) != null) {
+                    StringTokenizer tok = new StringTokenizer(line, "\t");
+                    title_displayed = tok.nextToken();
+                    link_displayed = tok.nextToken();
+                    displaycount = Integer.parseInt(tok.nextToken());
+                    viewcount = Integer.parseInt(tok.nextToken());
+                    touch = Integer.parseInt(tok.nextToken());
+                    try {
+                        BufferedReader br = new BufferedReader(new FileReader(RECEIVED));
+                        flag = true;             //tmp.txtに書き込みをしたか否かのフラグ
+                        while ((line2 = br.readLine()) != null) {
+                            StringTokenizer tok2 = new StringTokenizer(line2, "\t");
+                            title_received = tok2.nextToken();
+                            link_received = tok2.nextToken();
+                            if (title_displayed.equals(title_received)) {     // 前回表示した見出し文との比較
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if(flag){            //dispalyed.txtにあってreceived.txtにない
+                            displaycount++;
+                            list.add(title_displayed + "\t" + link_displayed + "\t" + displaycount + "\t" + viewcount + "\t" + touch);
+                        }
+                        br.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                bw.close();
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+
             for ( int i = 0; i < list.size(); i++ ) {
                 System.out.println( list.get( i ) );
             }
